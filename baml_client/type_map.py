@@ -46,6 +46,9 @@ type_map = {
     "types.GrepTool": types.GrepTool,
     "stream_types.GrepTool": stream_types.GrepTool,
 
+    "types.InstallPackagesTool": types.InstallPackagesTool,
+    "stream_types.InstallPackagesTool": stream_types.InstallPackagesTool,
+
     "types.LSTool": types.LSTool,
     "stream_types.LSTool": stream_types.LSTool,
 

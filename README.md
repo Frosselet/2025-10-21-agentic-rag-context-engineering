@@ -183,7 +183,7 @@ An agent system built with BAML that can execute various tools using pattern mat
 This project demonstrates an agentic system that:
 - Uses BAML to define tool schemas and agent behavior
 - Implements tool handlers using Python's `match` statement
-- Supports 22 different tool types for file operations, coding tools, code execution, web fetching, and more
+- Supports 23 different tool types for file operations, coding tools, code execution, web fetching, and more
 
 ## Architecture
 
@@ -220,8 +220,9 @@ The agent supports the following tools:
 18. **LintTool** - Ruff-based code quality checking with auto-fix capability (fully implemented)
 19. **TypeCheckTool** - Static type analysis using mypy/pyright (fully implemented)
 20. **FormatTool** - Black code formatting with diff preview (fully implemented)
-21. **DependencyTool** - Package analysis and dependency checking (fully implemented)
+21. **DependencyTool** - Enhanced package analysis with import checking and installation guidance (fully implemented)
 22. **GitDiffTool** - Git diff functionality with context (fully implemented)
+23. **InstallPackagesTool** - Permission-based package installation with uv/pip support (fully implemented)
 
 ## Tool Handler Pattern
 
@@ -243,7 +244,11 @@ async def execute_tool(tool: types.AgentTools) -> str:
             return execute_lint(tool)
         case "TypeCheck":
             return execute_type_check(tool)
-        # ... etc for all 22 tools
+        case "Dependency":
+            return execute_dependency(tool)
+        case "InstallPackages":
+            return execute_install_packages(tool)
+        # ... etc for all 23 tools
         case other:
             return f"Unknown tool type: {other}"
 ```
@@ -492,6 +497,26 @@ uv run python main.py "Check if all required dependencies are installed" --tui
 
 # View git changes
 uv run python main.py "Show me what files have changed since the last commit" --tui
+
+# Smart dependency management (NEW!)
+uv run python main.py "Generate plots from my CSV data" --tui
+# Agent will automatically detect missing packages, ask permission, install them, then create plots!
+```
+
+### Smart Dependency Management (NEW!)
+
+The agent now proactively handles missing Python packages:
+
+```bash
+# The agent detects missing packages and offers to install them
+uv run python main.py "Create a data visualization from my dataset" --tui
+
+# Example workflow:
+# 1. Agent detects pandas/matplotlib are needed
+# 2. Checks if they're installed (they're not)
+# 3. Asks: "I need pandas, matplotlib for this task. Should I install them? [Y/N]"
+# 4. User approves, agent installs with: uv add pandas matplotlib
+# 5. Agent continues with the original task automatically!
 ```
 
 **Interactive Coding Workflow:**

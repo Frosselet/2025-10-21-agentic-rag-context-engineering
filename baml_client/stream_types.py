@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (27)
+# Generated classes (28)
 # #########################################################################
 
 class AgentTool(BaseModel):
@@ -41,6 +41,7 @@ class DependencyTool(BaseModel):
     action: typing.Optional[str] = None
     check_type: typing.Optional[str] = None
     requirements_file: typing.Optional[str] = None
+    packages: typing.Optional[typing.List[str]] = None
     update_available: typing.Optional[bool] = None
     include_dev: typing.Optional[bool] = None
 
@@ -89,6 +90,13 @@ class GrepTool(BaseModel):
     path: typing.Optional[str] = None
     include: typing.Optional[str] = None
 
+class InstallPackagesTool(BaseModel):
+    action: typing.Optional[str] = None
+    packages: typing.List[str]
+    dev: typing.Optional[bool] = None
+    upgrade: typing.Optional[bool] = None
+    user_confirmed: typing.Optional[bool] = None
+
 class LSTool(BaseModel):
     action: typing.Optional[str] = None
     path: typing.Optional[str] = None
@@ -105,7 +113,7 @@ class LintTool(BaseModel):
 
 class Message(BaseModel):
     role: typing.Optional[typing.Union[str, str]] = None
-    message: typing.Optional[typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "AgentTool"]] = None
+    message: typing.Optional[typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "AgentTool"]] = None
 
 class MultiEditTool(BaseModel):
     action: typing.Optional[str] = None
@@ -194,13 +202,13 @@ class WriteTool(BaseModel):
 # #########################################################################
 
 
-AgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "AgentTool"]]
+AgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "AgentTool"]]
 
 
-CodingTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool"]]
+CodingTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool"]]
 
 
 ScaryTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "TodoWriteTool"]]
 
 
-SubAgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool"]]
+SubAgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool"]]

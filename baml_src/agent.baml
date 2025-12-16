@@ -44,6 +44,17 @@ function AgentLoop(state: Message[], working_dir: string) -> AgentTools | ReplyT
     - Follow security best practices - never expose secrets or keys
     - DO NOT add comments unless explicitly requested
 
+    # Dependency Management (IMPORTANT)
+    When you need Python packages for a task (plotting, data analysis, etc.):
+    1. FIRST check if packages are available: use Dependency with check_type="imports", packages=["package1", "package2"]
+    2. If packages are missing, ASK USER for permission: "I need to install pandas, numpy for this task. Should I install them? [Y/N]"
+    3. If user approves, use InstallPackages with user_confirmed=true
+    4. Then continue with the original task
+
+    Example workflow:
+    - User asks for plots → Check imports → Ask permission → Install packages → Generate plots
+    - Never give up or ask user to install manually - be proactive!
+
     # Communication Style
     - Be concise and direct
     - Minimize output tokens while maintaining helpfulness
@@ -119,6 +130,13 @@ function SubAgentLoop(goal: string, state: Message[], working_dir: string) -> Su
     - Check for existing libraries before introducing new ones
     - Follow security best practices
     - DO NOT add comments unless explicitly requested
+
+    # Dependency Management
+    When you need Python packages:
+    1. Check imports with Dependency tool (check_type="imports")
+    2. Ask user permission if packages missing
+    3. Use InstallPackages with user_confirmed=true if approved
+    4. Continue with task - never give up on missing dependencies!
 
     # Security
     IMPORTANT: Refuse to work on code that may be used maliciously.

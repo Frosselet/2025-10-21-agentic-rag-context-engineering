@@ -935,8 +935,57 @@ def execute_dependency(tool: types.DependencyTool, working_dir: str = ".") -> st
             else:
                 output_lines.append("Error listing packages")
 
+        elif check_type == "imports":
+            # Check if specific packages can be imported
+            packages = tool.packages or []
+            if not packages:
+                return "Error: packages parameter is required for 'imports' check type"
+
+            missing_packages = []
+            available_packages = []
+
+            for package_name in packages:
+                try:
+                    import importlib.util
+                    # Check common package name variations
+                    variations = [
+                        package_name,
+                        package_name.replace('-', '_'),
+                        package_name.replace('_', '-'),
+                        package_name.lower()
+                    ]
+
+                    found = False
+                    for variation in variations:
+                        spec = importlib.util.find_spec(variation)
+                        if spec is not None:
+                            available_packages.append(package_name)
+                            found = True
+                            break
+
+                    if not found:
+                        missing_packages.append(package_name)
+
+                except Exception:
+                    missing_packages.append(package_name)
+
+            # Report results
+            output_lines.append(f"Import check for {len(packages)} packages:")
+
+            if available_packages:
+                output_lines.append(f"\n✅ Available packages ({len(available_packages)}):")
+                output_lines.extend([f"  - {pkg}" for pkg in available_packages])
+
+            if missing_packages:
+                output_lines.append(f"\n❌ Missing packages ({len(missing_packages)}):")
+                output_lines.extend([f"  - {pkg}" for pkg in missing_packages])
+                output_lines.append("\n💡 To install missing packages:")
+                output_lines.append(f"   uv add {' '.join(missing_packages)}")
+                output_lines.append(f"   # or: pip install {' '.join(missing_packages)}")
+                output_lines.append("\n🤖 The agent can install these for you if you approve.")
+
         else:
-            return f"Error: Unknown check_type '{check_type}'. Use 'missing', 'outdated', or 'tree'"
+            return f"Error: Unknown check_type '{check_type}'. Use 'missing', 'outdated', 'tree', or 'imports'"
 
         return "\n".join(output_lines)
 
@@ -1021,6 +1070,121 @@ def execute_git_diff(tool: types.GitDiffTool, working_dir: str = ".") -> str:
         return f"Error running git diff: {str(e)}"
 
 
+def execute_install_packages(tool: types.InstallPackagesTool, working_dir: str = ".") -> str:
+    """Install Python packages using uv or pip with user permission"""
+    try:
+        # Safety check - require user confirmation
+        if not tool.user_confirmed:
+            return "❌ Error: Installation requires user confirmation. Set user_confirmed=true to proceed."
+
+        packages = tool.packages
+        if not packages:
+            return "❌ Error: No packages specified for installation"
+
+        # Format output
+        output_lines = []
+        output_lines.append("📦 Installing packages...")
+        output_lines.append(f"Packages: {', '.join(packages)}")
+        output_lines.append(f"Development: {'Yes' if tool.dev else 'No'}")
+        output_lines.append(f"Upgrade: {'Yes' if tool.upgrade else 'No'}")
+        output_lines.append(f"Working directory: {working_dir}")
+        output_lines.append("")
+
+        # Try uv first (preferred), then fallback to pip
+        uv_available = False
+        pip_available = False
+
+        # Check if uv is available
+        try:
+            uv_result = subprocess.run(["uv", "--version"], capture_output=True, timeout=5, cwd=working_dir)
+            if uv_result.returncode == 0:
+                uv_available = True
+                output_lines.append("✅ Using uv (preferred package manager)")
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+
+        # Check if pip is available if uv isn't
+        if not uv_available:
+            try:
+                pip_result = subprocess.run(["pip", "--version"], capture_output=True, timeout=5, cwd=working_dir)
+                if pip_result.returncode == 0:
+                    pip_available = True
+                    output_lines.append("✅ Using pip (fallback package manager)")
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                pass
+
+        if not uv_available and not pip_available:
+            return "❌ Error: Neither uv nor pip are available. Please install a package manager."
+
+        # Build installation command
+        if uv_available:
+            cmd = ["uv", "add"]
+            if tool.dev:
+                cmd.append("--dev")
+            if tool.upgrade:
+                cmd.append("--upgrade")
+            cmd.extend(packages)
+        else:
+            cmd = ["pip", "install"]
+            if tool.upgrade:
+                cmd.append("--upgrade")
+            cmd.extend(packages)
+
+        # Execute installation
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append("")
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minutes timeout for installs
+            cwd=working_dir
+        )
+
+        if result.returncode == 0:
+            output_lines.append("✅ Installation completed successfully!")
+            if result.stdout.strip():
+                stdout_lines = result.stdout.strip().split('\n')
+                # Show relevant output (truncated for large installs)
+                if len(stdout_lines) > 50:
+                    output_lines.append("\nInstallation output (truncated):")
+                    output_lines.extend(stdout_lines[-20:])  # Show last 20 lines
+                    output_lines.append(f"... (showing last 20 of {len(stdout_lines)} lines)")
+                else:
+                    output_lines.append("\nInstallation output:")
+                    output_lines.extend(stdout_lines)
+        else:
+            output_lines.append("❌ Installation failed!")
+            if result.stderr:
+                output_lines.append("\nError details:")
+                error_lines = result.stderr.strip().split('\n')
+                # Show error details (truncated for very long errors)
+                if len(error_lines) > 30:
+                    output_lines.extend(error_lines[:20])
+                    output_lines.append(f"... (showing first 20 of {len(error_lines)} error lines)")
+                else:
+                    output_lines.extend(error_lines)
+
+            # Provide helpful suggestions
+            output_lines.append("\n💡 Troubleshooting suggestions:")
+            if uv_available:
+                output_lines.append("   - Check package names are correct")
+                output_lines.append("   - Try: uv sync to refresh dependencies")
+                output_lines.append("   - Try: uv lock --upgrade to update lockfile")
+            else:
+                output_lines.append("   - Check package names are correct")
+                output_lines.append("   - Try: pip install --upgrade pip")
+                output_lines.append("   - Consider using uv for better dependency management")
+
+        return "\n".join(output_lines)
+
+    except subprocess.TimeoutExpired:
+        return "❌ Error: Package installation timed out (5 minute limit)"
+    except Exception as e:
+        return f"❌ Error installing packages: {str(e)}"
+
+
 async def execute_agent(tool: types.AgentTool) -> str:
     """Launch a sub-agent (recursive call)"""
     try:
@@ -1080,6 +1244,8 @@ async def execute_tool(tool: types.AgentTools, working_dir: str = ".") -> str:
             return execute_dependency(tool, working_dir)
         case "GitDiff":
             return execute_git_diff(tool, working_dir)
+        case "InstallPackages":
+            return execute_install_packages(tool, working_dir)
         case "Agent":
             return await execute_agent(tool)
         case other:

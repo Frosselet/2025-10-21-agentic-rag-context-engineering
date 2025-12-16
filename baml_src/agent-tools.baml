@@ -499,14 +499,16 @@ class DependencyTool {
     Usage:
     - Compares installed packages with requirements
     - Identifies outdated or missing dependencies
+    - Can check if specific packages can be imported
     - Can show dependency tree and conflicts
     - Supports multiple requirements file formats
     - Returns formatted dependency analysis
     - Helps maintain project dependency health
 
     Parameters:
-    - check_type: Type of check ('outdated', 'missing', 'tree', 'security')
+    - check_type: Type of check ('outdated', 'missing', 'tree', 'imports')
     - requirements_file: Path to requirements file (defaults to 'pyproject.toml')
+    - packages: List of package names to check (for 'imports' check_type)
     - update_available: Show available updates for packages
     - include_dev: Include development dependencies in analysis
 
@@ -514,10 +516,12 @@ class DependencyTool {
     - Check missing deps: Dependency with check_type="missing"
     - Find outdated packages: Dependency with check_type="outdated"
     - Show dependency tree: Dependency with check_type="tree"
+    - Check imports: Dependency with check_type="imports", packages=["pandas", "numpy"]
     - Include dev deps: Dependency with include_dev=true
   "#)
-  check_type string? @description("Check type: 'outdated', 'missing', 'tree', 'security'")
+  check_type string? @description("Check type: 'outdated', 'missing', 'tree', 'imports'")
   requirements_file string? @description("Requirements file path (default 'pyproject.toml')")
+  packages string[]? @description("Package names to check (for 'imports' check_type)")
   update_available bool? @description("Show available package updates")
   include_dev bool? @description("Include development dependencies")
 }
@@ -556,8 +560,41 @@ class GitDiffTool {
   ignore_whitespace bool? @description("Ignore whitespace changes")
 }
 
+class InstallPackagesTool {
+  action "InstallPackages" @description(#"
+    Install Python packages using uv or pip with user permission.
+
+    Usage:
+    - Automatically detects whether to use uv or pip
+    - Installs packages with proper dependency resolution
+    - Provides clear feedback on installation success/failure
+    - Can install multiple packages at once
+    - Handles both production and development dependencies
+
+    IMPORTANT: This tool should only be used after the agent has:
+    1. Detected missing packages needed for a task
+    2. Asked the user for permission to install packages
+    3. Received explicit user approval
+
+    Parameters:
+    - packages: List of package names to install (required)
+    - dev: Install as development dependencies (optional, defaults to false)
+    - upgrade: Upgrade packages if already installed (optional, defaults to false)
+    - user_confirmed: Confirmation that user approved installation (required)
+
+    Examples:
+    - Install plotting libs: InstallPackages with packages=["pandas", "matplotlib", "seaborn"], user_confirmed=true
+    - Install dev deps: InstallPackages with packages=["pytest", "black"], dev=true, user_confirmed=true
+    - Upgrade packages: InstallPackages with packages=["numpy"], upgrade=true, user_confirmed=true
+  "#)
+  packages string[] @description("Package names to install (required)")
+  dev bool? @description("Install as development dependencies (default false)")
+  upgrade bool? @description("Upgrade packages if already installed (default false)")
+  user_confirmed bool @description("User has confirmed installation (required for safety)")
+}
+
 // Union type for all tools
 type ScaryTools =  EditTool | MultiEditTool | WriteTool | NotebookEditTool | TodoWriteTool
-type CodingTools = PytestRunTool | LintTool | TypeCheckTool | FormatTool | DependencyTool | GitDiffTool
+type CodingTools = PytestRunTool | LintTool | TypeCheckTool | FormatTool | DependencyTool | GitDiffTool | InstallPackagesTool
 type AgentTools = SubAgentTools | AgentTool
 type SubAgentTools = BashTool | GlobTool | GrepTool | LSTool | ExitPlanModeTool | ReadTool | WebFetchTool | TodoReadTool | TodoWriteTool | WebSearchTool | ScaryTools | CodingTools

@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["AgentTool","BashTool","DependencyTool","EditOperation","EditTool","ExitPlanModeTool","FormatTool","GitDiffTool","GlobTool","GrepTool","LSTool","LintTool","Message","MultiEditTool","NotebookEditTool","NotebookReadTool","PytestRunTool","ReadTool","ReplyToUser","Resume","TodoItem","TodoReadTool","TodoWriteTool","TypeCheckTool","WebFetchTool","WebSearchTool","WriteTool",]
+          ["AgentTool","BashTool","DependencyTool","EditOperation","EditTool","ExitPlanModeTool","FormatTool","GitDiffTool","GlobTool","GrepTool","InstallPackagesTool","LSTool","LintTool","Message","MultiEditTool","NotebookEditTool","NotebookReadTool","PytestRunTool","ReadTool","ReplyToUser","Resume","TodoItem","TodoReadTool","TodoWriteTool","TypeCheckTool","WebFetchTool","WebSearchTool","WriteTool",]
         ), enums=set(
           []
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -31,7 +31,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
     # #########################################################################
-    # Generated classes 27
+    # Generated classes 28
     # #########################################################################
 
     @property
@@ -73,6 +73,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def GrepTool(self) -> "GrepToolViewer":
         return GrepToolViewer(self)
+
+    @property
+    def InstallPackagesTool(self) -> "InstallPackagesToolViewer":
+        return InstallPackagesToolViewer(self)
 
     @property
     def LSTool(self) -> "LSToolViewer":
@@ -150,7 +154,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
 # #########################################################################
-# Generated classes 27
+# Generated classes 28
 # #########################################################################
 
 class AgentToolAst:
@@ -255,7 +259,7 @@ class DependencyToolAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
         self._bldr = _tb.class_("DependencyTool")
-        self._properties: typing.Set[str] = set([  "action",  "check_type",  "requirements_file",  "update_available",  "include_dev",  ])
+        self._properties: typing.Set[str] = set([  "action",  "check_type",  "requirements_file",  "packages",  "update_available",  "include_dev",  ])
         self._props = DependencyToolProperties(self._bldr, self._properties)
 
     def type(self) -> baml_py.FieldType:
@@ -294,6 +298,10 @@ class DependencyToolProperties:
     @property
     def requirements_file(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("requirements_file"))
+    
+    @property
+    def packages(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("packages"))
     
     @property
     def update_available(self) -> type_builder.ClassPropertyViewer:
@@ -671,6 +679,61 @@ class GrepToolProperties:
     @property
     def include(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("include"))
+    
+    
+
+
+class InstallPackagesToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("InstallPackagesTool")
+        self._properties: typing.Set[str] = set([  "action",  "packages",  "dev",  "upgrade",  "user_confirmed",  ])
+        self._props = InstallPackagesToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "InstallPackagesToolProperties":
+        return self._props
+
+
+class InstallPackagesToolViewer(InstallPackagesToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class InstallPackagesToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def packages(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("packages"))
+    
+    @property
+    def dev(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("dev"))
+    
+    @property
+    def upgrade(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("upgrade"))
+    
+    @property
+    def user_confirmed(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("user_confirmed"))
     
     
 
