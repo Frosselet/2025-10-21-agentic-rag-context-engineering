@@ -40,8 +40,41 @@ type_map = {
     "types.FormatTool": types.FormatTool,
     "stream_types.FormatTool": stream_types.FormatTool,
 
+    "types.GitAddTool": types.GitAddTool,
+    "stream_types.GitAddTool": stream_types.GitAddTool,
+
+    "types.GitBranchTool": types.GitBranchTool,
+    "stream_types.GitBranchTool": stream_types.GitBranchTool,
+
+    "types.GitCommitTool": types.GitCommitTool,
+    "stream_types.GitCommitTool": stream_types.GitCommitTool,
+
     "types.GitDiffTool": types.GitDiffTool,
     "stream_types.GitDiffTool": stream_types.GitDiffTool,
+
+    "types.GitLogTool": types.GitLogTool,
+    "stream_types.GitLogTool": stream_types.GitLogTool,
+
+    "types.GitMergeTool": types.GitMergeTool,
+    "stream_types.GitMergeTool": stream_types.GitMergeTool,
+
+    "types.GitRebaseTool": types.GitRebaseTool,
+    "stream_types.GitRebaseTool": stream_types.GitRebaseTool,
+
+    "types.GitRemoteTool": types.GitRemoteTool,
+    "stream_types.GitRemoteTool": stream_types.GitRemoteTool,
+
+    "types.GitResetTool": types.GitResetTool,
+    "stream_types.GitResetTool": stream_types.GitResetTool,
+
+    "types.GitStashTool": types.GitStashTool,
+    "stream_types.GitStashTool": stream_types.GitStashTool,
+
+    "types.GitStatusTool": types.GitStatusTool,
+    "stream_types.GitStatusTool": stream_types.GitStatusTool,
+
+    "types.GitTagTool": types.GitTagTool,
+    "stream_types.GitTagTool": stream_types.GitTagTool,
 
     "types.GlobTool": types.GlobTool,
     "stream_types.GlobTool": stream_types.GlobTool,

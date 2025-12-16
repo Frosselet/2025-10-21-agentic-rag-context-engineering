@@ -41,7 +41,7 @@ def all_succeeded(checks: typing.Dict[CheckName, Check]) -> bool:
 # #########################################################################
 
 # #########################################################################
-# Generated classes (29)
+# Generated classes (40)
 # #########################################################################
 
 class AgentTool(BaseModel):
@@ -95,6 +95,33 @@ class FormatTool(BaseModel):
     skip_string_normalization: typing.Optional[bool] = None
     target_version: typing.Optional[str] = None
 
+class GitAddTool(BaseModel):
+    action: typing_extensions.Literal['GitAdd']
+    files: typing.Optional[typing.List[str]] = None
+    all: typing.Optional[bool] = None
+    update: typing.Optional[bool] = None
+    patch: typing.Optional[bool] = None
+    force: typing.Optional[bool] = None
+
+class GitBranchTool(BaseModel):
+    action: typing_extensions.Literal['GitBranch']
+    operation: str
+    branch_name: typing.Optional[str] = None
+    new_name: typing.Optional[str] = None
+    remote: typing.Optional[bool] = None
+    all: typing.Optional[bool] = None
+    merged: typing.Optional[bool] = None
+    force: typing.Optional[bool] = None
+
+class GitCommitTool(BaseModel):
+    action: typing_extensions.Literal['GitCommit']
+    message: str
+    amend: typing.Optional[bool] = None
+    no_verify: typing.Optional[bool] = None
+    signoff: typing.Optional[bool] = None
+    author: typing.Optional[str] = None
+    allow_empty: typing.Optional[bool] = None
+
 class GitDiffTool(BaseModel):
     action: typing_extensions.Literal['GitDiff']
     target_path: typing.Optional[str] = None
@@ -103,6 +130,74 @@ class GitDiffTool(BaseModel):
     stat: typing.Optional[bool] = None
     context_lines: typing.Optional[int] = None
     ignore_whitespace: typing.Optional[bool] = None
+
+class GitLogTool(BaseModel):
+    action: typing_extensions.Literal['GitLog']
+    max_count: typing.Optional[int] = None
+    since: typing.Optional[str] = None
+    until: typing.Optional[str] = None
+    author: typing.Optional[str] = None
+    grep: typing.Optional[str] = None
+    file_path: typing.Optional[str] = None
+    graph: typing.Optional[bool] = None
+    oneline: typing.Optional[bool] = None
+
+class GitMergeTool(BaseModel):
+    action: typing_extensions.Literal['GitMerge']
+    operation: str
+    branch_name: typing.Optional[str] = None
+    no_ff: typing.Optional[bool] = None
+    squash: typing.Optional[bool] = None
+    strategy: typing.Optional[str] = None
+    message: typing.Optional[str] = None
+
+class GitRebaseTool(BaseModel):
+    action: typing_extensions.Literal['GitRebase']
+    operation: str
+    target_branch: typing.Optional[str] = None
+    interactive: typing.Optional[bool] = None
+    preserve_merges: typing.Optional[bool] = None
+    autostash: typing.Optional[bool] = None
+
+class GitRemoteTool(BaseModel):
+    action: typing_extensions.Literal['GitRemote']
+    operation: str
+    remote_name: typing.Optional[str] = None
+    branch_name: typing.Optional[str] = None
+    all: typing.Optional[bool] = None
+    force: typing.Optional[bool] = None
+    prune: typing.Optional[bool] = None
+    set_upstream: typing.Optional[bool] = None
+
+class GitResetTool(BaseModel):
+    action: typing_extensions.Literal['GitReset']
+    operation: str
+    target: typing.Optional[str] = None
+    file_path: typing.Optional[str] = None
+    force: typing.Optional[bool] = None
+
+class GitStashTool(BaseModel):
+    action: typing_extensions.Literal['GitStash']
+    operation: str
+    stash_name: typing.Optional[str] = None
+    include_untracked: typing.Optional[bool] = None
+    keep_index: typing.Optional[bool] = None
+    patch: typing.Optional[bool] = None
+
+class GitStatusTool(BaseModel):
+    action: typing_extensions.Literal['GitStatus']
+    short_format: typing.Optional[bool] = None
+    untracked_files: typing.Optional[str] = None
+    ignored: typing.Optional[bool] = None
+
+class GitTagTool(BaseModel):
+    action: typing_extensions.Literal['GitTag']
+    operation: str
+    tag_name: typing.Optional[str] = None
+    message: typing.Optional[str] = None
+    target: typing.Optional[str] = None
+    force: typing.Optional[bool] = None
+    pattern: typing.Optional[str] = None
 
 class GlobTool(BaseModel):
     action: typing_extensions.Literal['Glob']
@@ -138,7 +233,7 @@ class LintTool(BaseModel):
 
 class Message(BaseModel):
     role: typing.Union[typing_extensions.Literal['user'], typing_extensions.Literal['assistant']]
-    message: typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "ArtifactManagementTool", "AgentTool"]
+    message: typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "InstallPackagesTool", "ArtifactManagementTool", "GitStatusTool", "GitLogTool", "GitAddTool", "GitCommitTool", "GitBranchTool", "GitDiffTool", "GitRemoteTool", "GitStashTool", "GitMergeTool", "GitRebaseTool", "GitTagTool", "GitResetTool", "AgentTool"]
 
 class MultiEditTool(BaseModel):
     action: typing_extensions.Literal['MultiEdit']
@@ -223,17 +318,20 @@ class WriteTool(BaseModel):
     content: str
 
 # #########################################################################
-# Generated type aliases (4)
+# Generated type aliases (5)
 # #########################################################################
 
 
-AgentTools: typing_extensions.TypeAlias = typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "ArtifactManagementTool", "AgentTool"]
+AgentTools: typing_extensions.TypeAlias = typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "InstallPackagesTool", "ArtifactManagementTool", "GitStatusTool", "GitLogTool", "GitAddTool", "GitCommitTool", "GitBranchTool", "GitDiffTool", "GitRemoteTool", "GitStashTool", "GitMergeTool", "GitRebaseTool", "GitTagTool", "GitResetTool", "AgentTool"]
 
 
-CodingTools: typing_extensions.TypeAlias = typing.Union["PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "ArtifactManagementTool"]
+CodingTools: typing_extensions.TypeAlias = typing.Union["PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "InstallPackagesTool", "ArtifactManagementTool", "GitStatusTool", "GitLogTool", "GitAddTool", "GitCommitTool", "GitBranchTool", "GitDiffTool", "GitRemoteTool", "GitStashTool", "GitMergeTool", "GitRebaseTool", "GitTagTool", "GitResetTool"]
+
+
+GitTools: typing_extensions.TypeAlias = typing.Union["GitStatusTool", "GitLogTool", "GitAddTool", "GitCommitTool", "GitBranchTool", "GitDiffTool", "GitRemoteTool", "GitStashTool", "GitMergeTool", "GitRebaseTool", "GitTagTool", "GitResetTool"]
 
 
 ScaryTools: typing_extensions.TypeAlias = typing.Union["EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "TodoWriteTool"]
 
 
-SubAgentTools: typing_extensions.TypeAlias = typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "InstallPackagesTool", "ArtifactManagementTool"]
+SubAgentTools: typing_extensions.TypeAlias = typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "InstallPackagesTool", "ArtifactManagementTool", "GitStatusTool", "GitLogTool", "GitAddTool", "GitCommitTool", "GitBranchTool", "GitDiffTool", "GitRemoteTool", "GitStashTool", "GitMergeTool", "GitRebaseTool", "GitTagTool", "GitResetTool"]
