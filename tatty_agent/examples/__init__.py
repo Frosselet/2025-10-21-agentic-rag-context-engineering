@@ -17,9 +17,14 @@ notebook_path = get_example_notebook("jupyter_demo")
 
 ## Available Examples
 
-- **jupyter_demo.ipynb**: Comprehensive Jupyter integration demonstration
+- **hello_world.ipynb**: Quick 5-minute introduction 🚀
+  - Basic agent usage and magic commands
+  - Data analysis example
+  - Perfect for getting started
+
+- **tatty_agent_jupyter_demo.ipynb**: Comprehensive feature showcase 🎯
   - Interactive chat widget usage
-  - Magic commands (%tatty, %%tatty)
+  - Advanced magic commands (%tatty, %%tatty)
   - Live tool execution with progress tracking
   - Notebook variable access and manipulation
   - Rich display formatting examples
@@ -78,23 +83,44 @@ def get_example_notebook(name: str) -> Optional[Path]:
 
     return None
 
+def show_hello_world():
+    """Display information about the Hello World notebook"""
+    hello_path = get_example_notebook("hello_world")
+
+    if hello_path:
+        print(f"🚀 TATty Agent Hello World")
+        print(f"📍 Location: {hello_path}")
+        print()
+        print("Perfect for getting started! This 5-minute intro covers:")
+        print("✅ Basic agent usage")
+        print("✅ Magic commands (%tatty)")
+        print("✅ Data analysis example")
+        print("✅ Project understanding")
+        print()
+        print("Quick start:")
+        print("  jupyter lab")
+        print("  # Open hello_world.ipynb and run all cells")
+
+        return str(hello_path)
+    else:
+        print("❌ Hello World notebook not found")
+        return None
+
 def show_jupyter_demo():
-    """Display information about the Jupyter demo notebook"""
+    """Display information about the comprehensive Jupyter demo notebook"""
     demo_path = get_example_notebook("tatty_agent_jupyter_demo")
 
     if demo_path:
-        print(f"🎉 TATty Agent Jupyter Demo")
+        print(f"🎯 TATty Agent Comprehensive Demo")
         print(f"📍 Location: {demo_path}")
         print()
-        print("To use the demo:")
-        print("1. Copy the notebook to your working directory")
-        print("2. Open in Jupyter: jupyter lab")
-        print("3. Follow the step-by-step examples")
+        print("Advanced features demonstration:")
+        print("✅ Interactive chat widgets")
+        print("✅ Live tool execution tracking")
+        print("✅ Rich display formatting")
+        print("✅ Notebook variable manipulation")
         print()
-        print("Quick start:")
-        print("  from tatty_agent import TattyAgent")
-        print("  agent = TattyAgent()")
-        print("  result = agent.run('Analyze this project')")
+        print("After you've tried hello_world.ipynb!")
 
         return str(demo_path)
     else:
@@ -132,6 +158,7 @@ __all__ = [
     'get_examples_dir',
     'list_examples',
     'get_example_notebook',
+    'show_hello_world',
     'show_jupyter_demo',
     'copy_example'
 ]
