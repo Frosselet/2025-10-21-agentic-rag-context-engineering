@@ -7,7 +7,7 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 keywords = ["ai", "agent", "code-analysis", "development-tools", "rag", "baml"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -17,8 +17,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -45,18 +43,18 @@ dependencies = [
     "numpy>=2.2.6",
     "markdown>=3.10",
 
-    # Async support for Jupyter
+    # Jupyter integration (core feature)
     "nest-asyncio>=1.5.0",
+    "ipywidgets>=8.0.0",
+    "IPython>=8.0.0",
 ]
 
 [project.optional-dependencies]
 # UI components
 tui = ["textual>=0.47.0"]
 
-# Jupyter notebook integration
+# Additional Jupyter tools
 jupyter = [
-    "ipywidgets>=8.0.0",
-    "IPython>=8.0.0",
     "jupyter>=1.0.0",
     "notebook>=6.0.0"
 ]
@@ -117,7 +115,7 @@ build-backend = "hatchling.build"
 # Tool configurations
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -138,7 +136,7 @@ ignore = [
 "__init__.py" = ["F401", "F403"]  # Allow unused imports in __init__.py
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Allow gradual typing
