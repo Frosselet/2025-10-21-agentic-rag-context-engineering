@@ -82,6 +82,21 @@ import asyncio
 from pathlib import Path
 from typing import Optional, Union, Dict, Any, List
 
+# Apply nest_asyncio if we're in an environment that needs it (like Jupyter)
+try:
+    # Check if we're in an event loop already
+    asyncio.get_running_loop()
+    # If we get here, there's a running loop, apply nest_asyncio
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+    except ImportError:
+        # nest_asyncio not available, will handle in run method
+        pass
+except RuntimeError:
+    # No running loop, normal environment
+    pass
+
 from .core.runtime import AgentRuntime
 from .core.state import AgentState, AgentCallbacks
 from .config import TattyConfig, load_config, ProjectInitializer
@@ -204,18 +219,8 @@ class TattyAgent:
         })
 
         try:
-            # Run the agent loop - handle both regular Python and Jupyter environments
-            try:
-                # Check if we're already in an event loop (like Jupyter)
-                loop = asyncio.get_running_loop()
-                # We're in an event loop (Jupyter), use nest_asyncio
-                import nest_asyncio
-                nest_asyncio.apply(loop)
-                # Now we can safely use asyncio.run
-                result = asyncio.run(self.runtime.run_loop(query, iterations))
-            except RuntimeError:
-                # No running loop, use normal asyncio.run (CLI/script mode)
-                result = asyncio.run(self.runtime.run_loop(query, iterations))
+            # Run the agent loop (nest_asyncio applied at import time if needed)
+            result = asyncio.run(self.runtime.run_loop(query, iterations))
 
             # Add result to conversation history
             self._conversation_history.append({
