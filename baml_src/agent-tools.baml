@@ -354,7 +354,210 @@ class WebSearchTool {
   blocked_domains string[]? @description("Never include search results from these domains")
 }
 
+class PytestRunTool {
+  action "PytestRun" @description(#"
+    Run pytest tests and return results with detailed output formatting.
+
+    Usage:
+    - Executes pytest with specified options and paths
+    - Returns formatted test results including passed/failed counts
+    - Supports various pytest options like verbose mode, specific test selection
+    - Handles test discovery and execution with proper working directory context
+    - Provides truncated output with recovery instructions for large test suites
+    - Includes coverage information when available
+
+    Parameters:
+    - test_path: Optional path to specific test file or directory (defaults to discovering all tests)
+    - verbose: Enable verbose output (-v flag)
+    - capture: Control output capturing (default 'no' shows print statements)
+    - markers: Run only tests matching given mark expression
+    - keywords: Run only tests matching given keyword expression
+    - max_failures: Stop after N failures (--maxfail option)
+    - timeout: Override default timeout for long-running test suites
+
+    Examples:
+    - Run all tests: PytestRun with no parameters
+    - Run specific test: PytestRun with test_path="tests/test_agent.py"
+    - Run with verbose output: PytestRun with verbose=true
+    - Run tests matching keyword: PytestRun with keywords="test_function_name"
+  "#)
+  test_path string? @description("Path to test file or directory to run (defaults to test discovery)")
+  verbose bool? @description("Enable verbose output (-v flag)")
+  capture string? @description("Output capture mode: 'sys' (default), 'no', 'fd'")
+  markers string? @description("Run tests matching given mark expression (-m option)")
+  keywords string? @description("Run tests matching keyword expression (-k option)")
+  max_failures int? @description("Stop after N test failures (--maxfail option)")
+  timeout int? @description("Override timeout in milliseconds (default 120000)")
+}
+
+class LintTool {
+  action "Lint" @description(#"
+    Run Ruff linter for code quality checking with optional auto-fixing.
+
+    Usage:
+    - Performs fast Python linting using Ruff
+    - Supports auto-fixing of common issues
+    - Can target specific files or entire project
+    - Returns formatted lint results with line numbers and issue descriptions
+    - Handles large codebases with truncated output
+    - Provides helpful suggestions for fixing issues
+
+    Parameters:
+    - target_path: Path to file or directory to lint (defaults to current directory)
+    - fix: Automatically fix fixable lint issues
+    - show_fixes: Show what fixes would be applied without making changes
+    - select_codes: Comma-separated list of error codes to check (e.g. 'E,W,F')
+    - ignore: Comma-separated list of error codes to ignore
+    - format: Output format ('text', 'json', 'github', 'gitlab', 'junit', 'sarif')
+
+    Examples:
+    - Lint current directory: Lint with no parameters
+    - Lint specific file: Lint with target_path="main.py"
+    - Auto-fix issues: Lint with fix=true
+    - Show potential fixes: Lint with show_fixes=true
+  "#)
+  target_path string? @description("Path to lint (file or directory, defaults to '.')")
+  fix bool? @description("Automatically fix fixable issues")
+  show_fixes bool? @description("Show fixes without applying them")
+  select_codes string? @description("Comma-separated error codes to check (e.g. 'E,W,F')")
+  ignore string? @description("Comma-separated error codes to ignore")
+  format string? @description("Output format: 'text' (default), 'json', 'github', 'gitlab'")
+}
+
+class TypeCheckTool {
+  action "TypeCheck" @description(#"
+    Run static type checking using mypy or pyright for Python code analysis.
+
+    Usage:
+    - Performs static type analysis to catch type-related errors
+    - Supports both mypy and pyright type checkers
+    - Can target specific files or entire project
+    - Returns formatted type check results with error locations
+    - Handles incremental checking for faster results
+    - Provides clear error messages with file and line numbers
+
+    Parameters:
+    - target_path: Path to type check (file or directory, defaults to '.')
+    - checker: Type checker to use ('mypy' or 'pyright', defaults to 'mypy')
+    - strict: Enable strict type checking mode
+    - ignore_missing_imports: Ignore errors from missing type stubs
+    - incremental: Use incremental mode for faster checking (mypy only)
+    - config_file: Path to configuration file (mypy.ini, pyproject.toml, etc.)
+
+    Examples:
+    - Type check current directory: TypeCheck with no parameters
+    - Type check specific file: TypeCheck with target_path="main.py"
+    - Strict type checking: TypeCheck with strict=true
+    - Use pyright instead: TypeCheck with checker="pyright"
+  "#)
+  target_path string? @description("Path to type check (defaults to '.')")
+  checker string? @description("Type checker: 'mypy' (default) or 'pyright'")
+  strict bool? @description("Enable strict type checking")
+  ignore_missing_imports bool? @description("Ignore missing import errors")
+  incremental bool? @description("Use incremental mode (mypy only)")
+  config_file string? @description("Path to configuration file")
+}
+
+class FormatTool {
+  action "Format" @description(#"
+    Format Python code using Black formatter with consistent style.
+
+    Usage:
+    - Formats Python code according to Black's style guide
+    - Can format specific files or entire directories
+    - Supports diff preview before applying changes
+    - Returns summary of formatting changes made
+    - Handles large codebases efficiently
+    - Ensures consistent code style across the project
+
+    Parameters:
+    - target_path: Path to format (file or directory, defaults to '.')
+    - check_only: Only check if files would be reformatted without changing them
+    - diff: Show diff of changes that would be made
+    - line_length: Override maximum line length (default 88)
+    - skip_string_normalization: Don't normalize string quotes
+    - target_version: Python target version (e.g. 'py38', 'py39', 'py310')
+
+    Examples:
+    - Format current directory: Format with no parameters
+    - Check formatting only: Format with check_only=true
+    - Show formatting diff: Format with diff=true
+    - Custom line length: Format with line_length=100
+  "#)
+  target_path string? @description("Path to format (defaults to '.')")
+  check_only bool? @description("Check formatting without making changes")
+  diff bool? @description("Show diff of formatting changes")
+  line_length int? @description("Maximum line length (default 88)")
+  skip_string_normalization bool? @description("Don't normalize string quotes")
+  target_version string? @description("Python target version (py38, py39, py310, etc.)")
+}
+
+class DependencyTool {
+  action "Dependency" @description(#"
+    Check and manage Python dependencies and package versions.
+
+    Usage:
+    - Compares installed packages with requirements
+    - Identifies outdated or missing dependencies
+    - Can show dependency tree and conflicts
+    - Supports multiple requirements file formats
+    - Returns formatted dependency analysis
+    - Helps maintain project dependency health
+
+    Parameters:
+    - check_type: Type of check ('outdated', 'missing', 'tree', 'security')
+    - requirements_file: Path to requirements file (defaults to 'pyproject.toml')
+    - update_available: Show available updates for packages
+    - include_dev: Include development dependencies in analysis
+
+    Examples:
+    - Check missing deps: Dependency with check_type="missing"
+    - Find outdated packages: Dependency with check_type="outdated"
+    - Show dependency tree: Dependency with check_type="tree"
+    - Include dev deps: Dependency with include_dev=true
+  "#)
+  check_type string? @description("Check type: 'outdated', 'missing', 'tree', 'security'")
+  requirements_file string? @description("Requirements file path (default 'pyproject.toml')")
+  update_available bool? @description("Show available package updates")
+  include_dev bool? @description("Include development dependencies")
+}
+
+class GitDiffTool {
+  action "GitDiff" @description(#"
+    Compare files or directories against git HEAD or other references.
+
+    Usage:
+    - Shows differences between working directory and git references
+    - Can compare specific files or entire directories
+    - Supports various diff formats and context options
+    - Handles large diffs with intelligent truncation
+    - Useful for code review and change analysis
+    - Provides clear context about what has changed
+
+    Parameters:
+    - target_path: Path to diff (file or directory, defaults to all changes)
+    - reference: Git reference to compare against (default 'HEAD')
+    - staged: Show staged changes instead of working directory
+    - stat: Show diffstat summary instead of full diff
+    - context_lines: Number of context lines around changes
+    - ignore_whitespace: Ignore whitespace changes
+
+    Examples:
+    - Show all changes: GitDiff with no parameters
+    - Diff specific file: GitDiff with target_path="main.py"
+    - Compare to different branch: GitDiff with reference="main"
+    - Show staged changes: GitDiff with staged=true
+  "#)
+  target_path string? @description("Path to diff (defaults to all changes)")
+  reference string? @description("Git reference to compare (default 'HEAD')")
+  staged bool? @description("Show staged changes")
+  stat bool? @description("Show diffstat summary")
+  context_lines int? @description("Context lines around changes (default 3)")
+  ignore_whitespace bool? @description("Ignore whitespace changes")
+}
+
 // Union type for all tools
 type ScaryTools =  EditTool | MultiEditTool | WriteTool | NotebookEditTool | TodoWriteTool
+type CodingTools = PytestRunTool | LintTool | TypeCheckTool | FormatTool | DependencyTool | GitDiffTool
 type AgentTools = SubAgentTools | AgentTool
-type SubAgentTools = BashTool | GlobTool | GrepTool | LSTool | ExitPlanModeTool | ReadTool | WebFetchTool | TodoReadTool | TodoWriteTool | WebSearchTool | ScaryTools
+type SubAgentTools = BashTool | GlobTool | GrepTool | LSTool | ExitPlanModeTool | ReadTool | WebFetchTool | TodoReadTool | TodoWriteTool | WebSearchTool | ScaryTools | CodingTools

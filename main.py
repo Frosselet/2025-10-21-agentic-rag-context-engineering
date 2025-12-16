@@ -473,6 +473,554 @@ def execute_exit_plan_mode(tool: types.ExitPlanModeTool, working_dir: str = ".")
     return f"Plan presented to user:\n{tool.plan}\n\nWaiting for user approval..."
 
 
+def execute_pytest_run(tool: types.PytestRunTool, working_dir: str = ".") -> str:
+    """Run pytest tests and return formatted results"""
+    try:
+        # Build pytest command
+        cmd = ["python", "-m", "pytest"]
+
+        # Add test path if specified
+        if tool.test_path:
+            cmd.append(tool.test_path)
+
+        # Add pytest options
+        if tool.verbose:
+            cmd.append("-v")
+
+        if tool.capture:
+            cmd.extend(["-s"] if tool.capture == "no" else [f"--capture={tool.capture}"])
+
+        if tool.markers:
+            cmd.extend(["-m", tool.markers])
+
+        if tool.keywords:
+            cmd.extend(["-k", tool.keywords])
+
+        if tool.max_failures:
+            cmd.extend(["--maxfail", str(tool.max_failures)])
+
+        # Add output formatting
+        cmd.extend(["--tb=short", "--no-header"])
+
+        # Execute with timeout
+        timeout = (tool.timeout / 1000) if tool.timeout else 120
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=working_dir
+        )
+
+        # Format output
+        output_lines = []
+
+        # Add command info
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append(f"Working directory: {working_dir}")
+        output_lines.append("")
+
+        # Process stdout
+        if result.stdout:
+            stdout_lines = result.stdout.strip().split('\n')
+
+            # Extract test summary
+            summary_line = None
+            for line in stdout_lines:
+                if " passed" in line or " failed" in line or " error" in line:
+                    summary_line = line
+                    break
+
+            if summary_line:
+                output_lines.append(f"Test Summary: {summary_line}")
+                output_lines.append("")
+
+            # Add detailed output (truncated if needed)
+            if len(stdout_lines) > 100:
+                output_lines.extend(stdout_lines[:50])
+                output_lines.append(f"\n... [Truncated: showing first 50 of {len(stdout_lines)} lines]")
+                output_lines.append("To see full output, run PytestRun with specific test_path")
+                output_lines.extend(stdout_lines[-20:])  # Show last 20 lines
+            else:
+                output_lines.extend(stdout_lines)
+
+        # Add stderr if present
+        if result.stderr:
+            output_lines.append("\nErrors:")
+            stderr_lines = result.stderr.strip().split('\n')
+            if len(stderr_lines) > 20:
+                output_lines.extend(stderr_lines[:20])
+                output_lines.append(f"... [Error output truncated: {len(stderr_lines)} total lines]")
+            else:
+                output_lines.extend(stderr_lines)
+
+        # Add exit code
+        output_lines.append(f"\nExit code: {result.returncode}")
+
+        return "\n".join(output_lines)
+
+    except FileNotFoundError:
+        return "Error: pytest not found. Install with: pip install pytest"
+    except subprocess.TimeoutExpired:
+        return f"Error: pytest timed out after {timeout}s. Consider using max_failures or specific test_path"
+    except Exception as e:
+        return f"Error running pytest: {str(e)}"
+
+
+def execute_lint(tool: types.LintTool, working_dir: str = ".") -> str:
+    """Run Ruff linter with optional auto-fixing"""
+    try:
+        # Build ruff command
+        cmd = ["ruff", "check"]
+
+        # Add target path
+        target = tool.target_path or "."
+        cmd.append(target)
+
+        # Add options
+        if tool.fix:
+            cmd.append("--fix")
+
+        if tool.show_fixes:
+            cmd.extend(["--diff", "--preview"])
+
+        if tool.select_codes:
+            cmd.extend(["--select", tool.select_codes])
+
+        if tool.ignore:
+            cmd.extend(["--ignore", tool.ignore])
+
+        if tool.format and tool.format != "text":
+            cmd.extend(["--format", tool.format])
+
+        # Execute ruff
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=60,  # Ruff is fast, 60s should be plenty
+            cwd=working_dir
+        )
+
+        # Format output
+        output_lines = []
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append(f"Target: {target}")
+        output_lines.append("")
+
+        if result.returncode == 0:
+            if tool.fix:
+                output_lines.append("✅ All fixable issues have been resolved")
+            else:
+                output_lines.append("✅ No lint issues found")
+
+            if result.stdout:
+                output_lines.append(result.stdout)
+        else:
+            # Process lint results
+            if result.stdout:
+                stdout_lines = result.stdout.strip().split('\n')
+
+                # Count issues
+                issue_count = sum(1 for line in stdout_lines if ':' in line and any(
+                    level in line for level in ['error:', 'warning:', 'info:']
+                ))
+
+                if issue_count > 0:
+                    output_lines.append(f"Found {issue_count} lint issues:")
+                    output_lines.append("")
+
+                # Truncate if too many issues
+                if len(stdout_lines) > 50:
+                    output_lines.extend(stdout_lines[:40])
+                    output_lines.append(f"\n... [Truncated: showing first 40 of {len(stdout_lines)} lines]")
+                    output_lines.append("Run with specific target_path to focus on fewer files")
+                    output_lines.extend(stdout_lines[-5:])  # Show last few lines
+                else:
+                    output_lines.extend(stdout_lines)
+
+            if result.stderr:
+                output_lines.append("\nErrors:")
+                output_lines.append(result.stderr)
+
+        # Add suggestions
+        if result.returncode != 0 and not tool.fix:
+            output_lines.append("\n💡 Tip: Use fix=true to automatically fix many of these issues")
+
+        return "\n".join(output_lines)
+
+    except FileNotFoundError:
+        return "Error: ruff not found. Install with: pip install ruff"
+    except subprocess.TimeoutExpired:
+        return "Error: Ruff timed out. Try targeting a smaller directory"
+    except Exception as e:
+        return f"Error running ruff: {str(e)}"
+
+
+def execute_type_check(tool: types.TypeCheckTool, working_dir: str = ".") -> str:
+    """Run static type checking"""
+    try:
+        checker = tool.checker or "mypy"
+        target = tool.target_path or "."
+
+        if checker == "mypy":
+            cmd = ["mypy", target]
+
+            if tool.strict:
+                cmd.append("--strict")
+
+            if tool.ignore_missing_imports:
+                cmd.append("--ignore-missing-imports")
+
+            if tool.incremental:
+                cmd.extend(["--incremental", "--cache-dir", ".mypy_cache"])
+
+            if tool.config_file:
+                cmd.extend(["--config-file", tool.config_file])
+
+        elif checker == "pyright":
+            cmd = ["pyright", target]
+
+            if tool.strict:
+                cmd.append("--level=error")
+
+            # Pyright reads configuration from pyrightconfig.json or pyproject.toml
+            if tool.config_file:
+                cmd.extend(["--project", tool.config_file])
+
+        else:
+            return f"Error: Unknown type checker '{checker}'. Use 'mypy' or 'pyright'"
+
+        # Execute type checker
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=120,  # Type checking can be slow
+            cwd=working_dir
+        )
+
+        # Format output
+        output_lines = []
+        output_lines.append(f"Type Checker: {checker}")
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append(f"Target: {target}")
+        output_lines.append("")
+
+        if result.returncode == 0:
+            output_lines.append("✅ No type errors found")
+            if result.stdout:
+                # Sometimes mypy outputs success info
+                output_lines.append(result.stdout.strip())
+        else:
+            # Process type errors
+            if result.stdout:
+                stdout_lines = result.stdout.strip().split('\n')
+
+                # Count errors
+                error_count = sum(1 for line in stdout_lines if 'error:' in line.lower())
+
+                if error_count > 0:
+                    output_lines.append(f"Found {error_count} type errors:")
+                    output_lines.append("")
+
+                # Truncate if too many errors
+                if len(stdout_lines) > 30:
+                    output_lines.extend(stdout_lines[:25])
+                    output_lines.append(f"\n... [Truncated: showing first 25 of {len(stdout_lines)} lines]")
+                    output_lines.append("Run with specific target_path to focus analysis")
+                    output_lines.extend(stdout_lines[-5:])
+                else:
+                    output_lines.extend(stdout_lines)
+
+        if result.stderr:
+            output_lines.append("\nWarnings/Errors:")
+            output_lines.append(result.stderr)
+
+        return "\n".join(output_lines)
+
+    except FileNotFoundError:
+        return f"Error: {checker} not found. Install with: pip install {checker}"
+    except subprocess.TimeoutExpired:
+        return f"Error: {checker} timed out. Try checking a smaller scope"
+    except Exception as e:
+        return f"Error running {checker}: {str(e)}"
+
+
+def execute_format(tool: types.FormatTool, working_dir: str = ".") -> str:
+    """Format Python code using Black"""
+    try:
+        # Build black command
+        cmd = ["black"]
+
+        # Add target path
+        target = tool.target_path or "."
+
+        # Add options
+        if tool.check_only:
+            cmd.append("--check")
+
+        if tool.diff:
+            cmd.append("--diff")
+
+        if tool.line_length:
+            cmd.extend(["--line-length", str(tool.line_length)])
+
+        if tool.skip_string_normalization:
+            cmd.append("--skip-string-normalization")
+
+        if tool.target_version:
+            cmd.extend(["--target-version", tool.target_version])
+
+        # Add target last
+        cmd.append(target)
+
+        # Execute black
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=60,  # Black is fast
+            cwd=working_dir
+        )
+
+        # Format output
+        output_lines = []
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append(f"Target: {target}")
+        output_lines.append("")
+
+        if result.returncode == 0:
+            if tool.check_only:
+                output_lines.append("✅ All files are already properly formatted")
+            else:
+                output_lines.append("✅ Code formatting completed successfully")
+
+            if result.stdout:
+                output_lines.append(result.stdout.strip())
+        else:
+            # Black found formatting issues
+            if result.stdout:
+                stdout_lines = result.stdout.strip().split('\n')
+
+                if tool.check_only:
+                    formatted_files = [line for line in stdout_lines if line.startswith("would reformat")]
+                    if formatted_files:
+                        output_lines.append(f"Found {len(formatted_files)} files that need formatting:")
+                        output_lines.extend(formatted_files)
+                        output_lines.append("\n💡 Run without check_only=true to apply formatting")
+                else:
+                    # Show formatting results
+                    if tool.diff:
+                        output_lines.append("Formatting changes:")
+                        # Truncate large diffs
+                        if len(stdout_lines) > 100:
+                            output_lines.extend(stdout_lines[:80])
+                            output_lines.append(f"\n... [Diff truncated: {len(stdout_lines)} total lines]")
+                            output_lines.append("Use target_path to format specific files for smaller diffs")
+                        else:
+                            output_lines.extend(stdout_lines)
+                    else:
+                        output_lines.extend(stdout_lines)
+
+        if result.stderr:
+            output_lines.append("\nErrors:")
+            output_lines.append(result.stderr)
+
+        return "\n".join(output_lines)
+
+    except FileNotFoundError:
+        return "Error: black not found. Install with: pip install black"
+    except subprocess.TimeoutExpired:
+        return "Error: Black timed out. Try formatting a smaller directory"
+    except Exception as e:
+        return f"Error running black: {str(e)}"
+
+
+def execute_dependency(tool: types.DependencyTool, working_dir: str = ".") -> str:
+    """Check and manage Python dependencies"""
+    try:
+        check_type = tool.check_type or "missing"
+        requirements_file = tool.requirements_file or "pyproject.toml"
+
+        output_lines = []
+        output_lines.append(f"Dependency Check: {check_type}")
+        output_lines.append(f"Requirements file: {requirements_file}")
+        output_lines.append(f"Working directory: {working_dir}")
+        output_lines.append("")
+
+        if check_type == "missing":
+            # Check for missing dependencies
+            try:
+                import toml
+                req_path = os.path.join(working_dir, requirements_file)
+
+                if not os.path.exists(req_path):
+                    return f"Error: Requirements file not found: {req_path}"
+
+                # Parse requirements
+                with open(req_path, 'r') as f:
+                    config = toml.load(f)
+
+                dependencies = []
+                if 'project' in config and 'dependencies' in config['project']:
+                    dependencies.extend(config['project']['dependencies'])
+
+                if tool.include_dev and 'project' in config and 'optional-dependencies' in config['project']:
+                    for group in config['project']['optional-dependencies'].values():
+                        dependencies.extend(group)
+
+                missing_packages = []
+                installed_packages = []
+
+                for dep in dependencies:
+                    # Extract package name (remove version constraints)
+                    package_name = dep.split('>=')[0].split('==')[0].split('~=')[0].split('<')[0].split('>')[0].strip()
+
+                    try:
+                        import importlib.util
+                        spec = importlib.util.find_spec(package_name.replace('-', '_'))
+                        if spec is None:
+                            missing_packages.append(dep)
+                        else:
+                            installed_packages.append(dep)
+                    except ImportError:
+                        missing_packages.append(dep)
+
+                if missing_packages:
+                    output_lines.append(f"❌ Found {len(missing_packages)} missing dependencies:")
+                    output_lines.extend([f"  - {pkg}" for pkg in missing_packages])
+                    output_lines.append(f"\n💡 Install with: pip install {' '.join(missing_packages)}")
+                else:
+                    output_lines.append("✅ All dependencies are installed")
+
+                if installed_packages:
+                    output_lines.append(f"\n✅ Installed ({len(installed_packages)} packages):")
+                    output_lines.extend([f"  - {pkg}" for pkg in installed_packages[:10]])  # Show first 10
+                    if len(installed_packages) > 10:
+                        output_lines.append(f"  ... and {len(installed_packages) - 10} more")
+
+            except ImportError:
+                return "Error: toml package not found. Install with: pip install toml"
+            except Exception as e:
+                return f"Error parsing requirements file: {str(e)}"
+
+        elif check_type == "outdated":
+            # Check for outdated packages
+            cmd = ["pip", "list", "--outdated", "--format=columns"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=working_dir)
+
+            if result.returncode == 0:
+                if result.stdout.strip():
+                    output_lines.append("Outdated packages:")
+                    output_lines.append(result.stdout.strip())
+                else:
+                    output_lines.append("✅ All packages are up to date")
+            else:
+                output_lines.append("Error checking outdated packages:")
+                output_lines.append(result.stderr or "Unknown error")
+
+        elif check_type == "tree":
+            # Show dependency tree
+            cmd = ["pip", "show", "--verbose"]
+            # Get all installed packages first
+            list_result = subprocess.run(["pip", "list", "--format=freeze"],
+                                        capture_output=True, text=True, timeout=30, cwd=working_dir)
+            if list_result.returncode == 0:
+                packages = [line.split('==')[0] for line in list_result.stdout.strip().split('\n') if line]
+                output_lines.append(f"Installed packages ({len(packages)}):")
+                output_lines.extend([f"  - {pkg}" for pkg in packages[:20]])  # Show first 20
+                if len(packages) > 20:
+                    output_lines.append(f"  ... and {len(packages) - 20} more")
+            else:
+                output_lines.append("Error listing packages")
+
+        else:
+            return f"Error: Unknown check_type '{check_type}'. Use 'missing', 'outdated', or 'tree'"
+
+        return "\n".join(output_lines)
+
+    except subprocess.TimeoutExpired:
+        return "Error: Dependency check timed out"
+    except Exception as e:
+        return f"Error checking dependencies: {str(e)}"
+
+
+def execute_git_diff(tool: types.GitDiffTool, working_dir: str = ".") -> str:
+    """Compare files against git references"""
+    try:
+        # Build git diff command
+        cmd = ["git", "diff"]
+
+        # Add reference
+        reference = tool.reference or "HEAD"
+        if reference != "HEAD":
+            cmd.append(reference)
+
+        # Add options
+        if tool.staged:
+            cmd.append("--staged")
+
+        if tool.stat:
+            cmd.append("--stat")
+
+        if tool.context_lines is not None:
+            cmd.extend([f"--context={tool.context_lines}"])
+
+        if tool.ignore_whitespace:
+            cmd.append("--ignore-space-change")
+
+        # Add target path
+        if tool.target_path:
+            cmd.append(tool.target_path)
+
+        # Execute git diff
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=working_dir
+        )
+
+        # Format output
+        output_lines = []
+        output_lines.append(f"Command: {' '.join(cmd)}")
+        output_lines.append(f"Reference: {reference}")
+        output_lines.append(f"Working directory: {working_dir}")
+        output_lines.append("")
+
+        if result.returncode == 0:
+            if result.stdout.strip():
+                stdout_lines = result.stdout.strip().split('\n')
+
+                # Truncate large diffs
+                if len(stdout_lines) > 200:
+                    output_lines.extend(stdout_lines[:150])
+                    output_lines.append(f"\n... [Diff truncated: showing first 150 of {len(stdout_lines)} lines]")
+                    output_lines.append("Use target_path to focus on specific files")
+                    output_lines.extend(stdout_lines[-20:])  # Show last 20 lines
+                else:
+                    output_lines.extend(stdout_lines)
+            else:
+                output_lines.append("✅ No differences found")
+        else:
+            if result.stderr:
+                output_lines.append("Error:")
+                output_lines.append(result.stderr.strip())
+            else:
+                output_lines.append("Git diff command failed")
+
+        return "\n".join(output_lines)
+
+    except FileNotFoundError:
+        return "Error: git not found or not in a git repository"
+    except subprocess.TimeoutExpired:
+        return "Error: Git diff timed out. Try using target_path for specific files"
+    except Exception as e:
+        return f"Error running git diff: {str(e)}"
+
+
 async def execute_agent(tool: types.AgentTool) -> str:
     """Launch a sub-agent (recursive call)"""
     try:
@@ -520,6 +1068,18 @@ async def execute_tool(tool: types.AgentTools, working_dir: str = ".") -> str:
             return execute_web_search(tool, working_dir)
         case "ExitPlanMode":
             return execute_exit_plan_mode(tool, working_dir)
+        case "PytestRun":
+            return execute_pytest_run(tool, working_dir)
+        case "Lint":
+            return execute_lint(tool, working_dir)
+        case "TypeCheck":
+            return execute_type_check(tool, working_dir)
+        case "Format":
+            return execute_format(tool, working_dir)
+        case "Dependency":
+            return execute_dependency(tool, working_dir)
+        case "GitDiff":
+            return execute_git_diff(tool, working_dir)
         case "Agent":
             return await execute_agent(tool)
         case other:

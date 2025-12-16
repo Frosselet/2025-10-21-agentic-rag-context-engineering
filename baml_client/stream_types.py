@@ -23,7 +23,7 @@ class StreamState(BaseModel, typing.Generic[StreamStateValueT]):
     value: StreamStateValueT
     state: typing_extensions.Literal["Pending", "Incomplete", "Complete"]
 # #########################################################################
-# Generated classes (21)
+# Generated classes (27)
 # #########################################################################
 
 class AgentTool(BaseModel):
@@ -36,6 +36,13 @@ class BashTool(BaseModel):
     command: typing.Optional[str] = None
     timeout: typing.Optional[int] = None
     description: typing.Optional[str] = None
+
+class DependencyTool(BaseModel):
+    action: typing.Optional[str] = None
+    check_type: typing.Optional[str] = None
+    requirements_file: typing.Optional[str] = None
+    update_available: typing.Optional[bool] = None
+    include_dev: typing.Optional[bool] = None
 
 class EditOperation(BaseModel):
     old_string: typing.Optional[str] = None
@@ -53,6 +60,24 @@ class ExitPlanModeTool(BaseModel):
     action: typing.Optional[str] = None
     plan: typing.Optional[str] = None
 
+class FormatTool(BaseModel):
+    action: typing.Optional[str] = None
+    target_path: typing.Optional[str] = None
+    check_only: typing.Optional[bool] = None
+    diff: typing.Optional[bool] = None
+    line_length: typing.Optional[int] = None
+    skip_string_normalization: typing.Optional[bool] = None
+    target_version: typing.Optional[str] = None
+
+class GitDiffTool(BaseModel):
+    action: typing.Optional[str] = None
+    target_path: typing.Optional[str] = None
+    reference: typing.Optional[str] = None
+    staged: typing.Optional[bool] = None
+    stat: typing.Optional[bool] = None
+    context_lines: typing.Optional[int] = None
+    ignore_whitespace: typing.Optional[bool] = None
+
 class GlobTool(BaseModel):
     action: typing.Optional[str] = None
     pattern: typing.Optional[str] = None
@@ -69,9 +94,18 @@ class LSTool(BaseModel):
     path: typing.Optional[str] = None
     ignore: typing.Optional[typing.List[str]] = None
 
+class LintTool(BaseModel):
+    action: typing.Optional[str] = None
+    target_path: typing.Optional[str] = None
+    fix: typing.Optional[bool] = None
+    show_fixes: typing.Optional[bool] = None
+    select_codes: typing.Optional[str] = None
+    ignore: typing.Optional[str] = None
+    format: typing.Optional[str] = None
+
 class Message(BaseModel):
     role: typing.Optional[typing.Union[str, str]] = None
-    message: typing.Optional[typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "AgentTool"]] = None
+    message: typing.Optional[typing.Union[str, "BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "AgentTool"]] = None
 
 class MultiEditTool(BaseModel):
     action: typing.Optional[str] = None
@@ -89,6 +123,16 @@ class NotebookEditTool(BaseModel):
 class NotebookReadTool(BaseModel):
     action: typing.Optional[str] = None
     notebook_path: typing.Optional[str] = None
+
+class PytestRunTool(BaseModel):
+    action: typing.Optional[str] = None
+    test_path: typing.Optional[str] = None
+    verbose: typing.Optional[bool] = None
+    capture: typing.Optional[str] = None
+    markers: typing.Optional[str] = None
+    keywords: typing.Optional[str] = None
+    max_failures: typing.Optional[int] = None
+    timeout: typing.Optional[int] = None
 
 class ReadTool(BaseModel):
     action: typing.Optional[str] = None
@@ -119,6 +163,15 @@ class TodoWriteTool(BaseModel):
     action: typing.Optional[str] = None
     todos: typing.List["TodoItem"]
 
+class TypeCheckTool(BaseModel):
+    action: typing.Optional[str] = None
+    target_path: typing.Optional[str] = None
+    checker: typing.Optional[str] = None
+    strict: typing.Optional[bool] = None
+    ignore_missing_imports: typing.Optional[bool] = None
+    incremental: typing.Optional[bool] = None
+    config_file: typing.Optional[str] = None
+
 class WebFetchTool(BaseModel):
     action: typing.Optional[str] = None
     url: typing.Optional[str] = None
@@ -137,14 +190,17 @@ class WriteTool(BaseModel):
     content: typing.Optional[str] = None
 
 # #########################################################################
-# Generated type aliases (3)
+# Generated type aliases (4)
 # #########################################################################
 
 
-AgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "AgentTool"]]
+AgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool", "AgentTool"]]
+
+
+CodingTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool"]]
 
 
 ScaryTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "TodoWriteTool"]]
 
 
-SubAgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool"]]
+SubAgentTools: typing_extensions.TypeAlias = typing.Optional[typing.Union["BashTool", "GlobTool", "GrepTool", "LSTool", "ExitPlanModeTool", "ReadTool", "WebFetchTool", "TodoReadTool", "TodoWriteTool", "WebSearchTool", "EditTool", "MultiEditTool", "WriteTool", "NotebookEditTool", "PytestRunTool", "LintTool", "TypeCheckTool", "FormatTool", "DependencyTool", "GitDiffTool"]]

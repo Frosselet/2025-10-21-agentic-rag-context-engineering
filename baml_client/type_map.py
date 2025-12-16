@@ -22,6 +22,9 @@ type_map = {
     "types.BashTool": types.BashTool,
     "stream_types.BashTool": stream_types.BashTool,
 
+    "types.DependencyTool": types.DependencyTool,
+    "stream_types.DependencyTool": stream_types.DependencyTool,
+
     "types.EditOperation": types.EditOperation,
     "stream_types.EditOperation": stream_types.EditOperation,
 
@@ -31,6 +34,12 @@ type_map = {
     "types.ExitPlanModeTool": types.ExitPlanModeTool,
     "stream_types.ExitPlanModeTool": stream_types.ExitPlanModeTool,
 
+    "types.FormatTool": types.FormatTool,
+    "stream_types.FormatTool": stream_types.FormatTool,
+
+    "types.GitDiffTool": types.GitDiffTool,
+    "stream_types.GitDiffTool": stream_types.GitDiffTool,
+
     "types.GlobTool": types.GlobTool,
     "stream_types.GlobTool": stream_types.GlobTool,
 
@@ -39,6 +48,9 @@ type_map = {
 
     "types.LSTool": types.LSTool,
     "stream_types.LSTool": stream_types.LSTool,
+
+    "types.LintTool": types.LintTool,
+    "stream_types.LintTool": stream_types.LintTool,
 
     "types.Message": types.Message,
     "stream_types.Message": stream_types.Message,
@@ -51,6 +63,9 @@ type_map = {
 
     "types.NotebookReadTool": types.NotebookReadTool,
     "stream_types.NotebookReadTool": stream_types.NotebookReadTool,
+
+    "types.PytestRunTool": types.PytestRunTool,
+    "stream_types.PytestRunTool": stream_types.PytestRunTool,
 
     "types.ReadTool": types.ReadTool,
     "stream_types.ReadTool": stream_types.ReadTool,
@@ -69,6 +84,9 @@ type_map = {
 
     "types.TodoWriteTool": types.TodoWriteTool,
     "stream_types.TodoWriteTool": stream_types.TodoWriteTool,
+
+    "types.TypeCheckTool": types.TypeCheckTool,
+    "stream_types.TypeCheckTool": stream_types.TypeCheckTool,
 
     "types.WebFetchTool": types.WebFetchTool,
     "stream_types.WebFetchTool": stream_types.WebFetchTool,

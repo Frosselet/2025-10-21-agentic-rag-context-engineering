@@ -183,7 +183,7 @@ An agent system built with BAML that can execute various tools using pattern mat
 This project demonstrates an agentic system that:
 - Uses BAML to define tool schemas and agent behavior
 - Implements tool handlers using Python's `match` statement
-- Supports 16 different tool types for file operations, code execution, web fetching, and more
+- Supports 22 different tool types for file operations, coding tools, code execution, web fetching, and more
 
 ## Architecture
 
@@ -214,6 +214,15 @@ The agent supports the following tools:
 15. **WebSearchTool** - Search the web (stub - requires search API)
 16. **ExitPlanModeTool** - Exit planning mode
 
+### Coding Tools (New!)
+
+17. **PytestRunTool** - Run pytest tests with detailed output and failure reporting (fully implemented)
+18. **LintTool** - Ruff-based code quality checking with auto-fix capability (fully implemented)
+19. **TypeCheckTool** - Static type analysis using mypy/pyright (fully implemented)
+20. **FormatTool** - Black code formatting with diff preview (fully implemented)
+21. **DependencyTool** - Package analysis and dependency checking (fully implemented)
+22. **GitDiffTool** - Git diff functionality with context (fully implemented)
+
 ## Tool Handler Pattern
 
 All tools are handled through a single async `execute_tool()` function using Python 3.10+ match statements on the `action` field:
@@ -228,7 +237,13 @@ async def execute_tool(tool: types.AgentTools) -> str:
             return execute_glob(tool)
         case "Agent":
             return await execute_agent(tool)  # Async for recursive calls
-        # ... etc for all 16 tools
+        case "PytestRun":
+            return execute_pytest_run(tool)
+        case "Lint":
+            return execute_lint(tool)
+        case "TypeCheck":
+            return execute_type_check(tool)
+        # ... etc for all 22 tools
         case other:
             return f"Unknown tool type: {other}"
 ```
@@ -391,6 +406,13 @@ Optional dependencies for specific tools:
 - `ddgs` - For WebSearch tool (install with `uv add ddgs`)
 - `ripgrep` (system package) - For Grep tool (usually pre-installed)
 
+Coding tools dependencies (for development workflows):
+- `pytest` - For PytestRunTool (install with `uv add pytest`)
+- `ruff` - For LintTool (install with `uv add ruff`)
+- `black` - For FormatTool (install with `uv add black`)
+- `mypy` - For TypeCheckTool (install with `uv add mypy`)
+- `git` (system package) - For GitDiffTool (usually pre-installed)
+
 ## In-Memory State
 
 The agent maintains in-memory state for:
@@ -448,6 +470,39 @@ uv run python main.py "List all JavaScript files" --dir ~/my-project
 
 # Interactive mode for multiple tasks
 uv run python main.py "List files" --interactive
+```
+
+### Coding Tools Examples
+
+```bash
+# Run tests with pytest
+uv run python main.py "Run all tests and show me the results" --tui
+
+# Check code quality with linting
+uv run python main.py "Lint all Python files and fix any issues" --tui
+
+# Type check the codebase
+uv run python main.py "Run type checking on the main.py file" --tui
+
+# Format code with Black
+uv run python main.py "Format all Python files and show me what would change" --tui
+
+# Check dependencies
+uv run python main.py "Check if all required dependencies are installed" --tui
+
+# View git changes
+uv run python main.py "Show me what files have changed since the last commit" --tui
+```
+
+**Interactive Coding Workflow:**
+```bash
+# Launch TUI for coding session
+uv run python main.py "Start" --tui
+
+# Then use commands like:
+> "Run tests first, then lint the code, and format it"
+> "Check dependencies and run type checking"
+> "Show git diff and run tests on changed files"
 ```
 
 ### Programmatic Usage

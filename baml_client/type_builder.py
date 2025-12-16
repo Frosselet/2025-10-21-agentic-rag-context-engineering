@@ -20,7 +20,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(type_builder.TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["AgentTool","BashTool","EditOperation","EditTool","ExitPlanModeTool","GlobTool","GrepTool","LSTool","Message","MultiEditTool","NotebookEditTool","NotebookReadTool","ReadTool","ReplyToUser","Resume","TodoItem","TodoReadTool","TodoWriteTool","WebFetchTool","WebSearchTool","WriteTool",]
+          ["AgentTool","BashTool","DependencyTool","EditOperation","EditTool","ExitPlanModeTool","FormatTool","GitDiffTool","GlobTool","GrepTool","LSTool","LintTool","Message","MultiEditTool","NotebookEditTool","NotebookReadTool","PytestRunTool","ReadTool","ReplyToUser","Resume","TodoItem","TodoReadTool","TodoWriteTool","TypeCheckTool","WebFetchTool","WebSearchTool","WriteTool",]
         ), enums=set(
           []
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -31,7 +31,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
     # #########################################################################
-    # Generated classes 21
+    # Generated classes 27
     # #########################################################################
 
     @property
@@ -41,6 +41,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def BashTool(self) -> "BashToolViewer":
         return BashToolViewer(self)
+
+    @property
+    def DependencyTool(self) -> "DependencyToolViewer":
+        return DependencyToolViewer(self)
 
     @property
     def EditOperation(self) -> "EditOperationViewer":
@@ -55,6 +59,14 @@ class TypeBuilder(type_builder.TypeBuilder):
         return ExitPlanModeToolViewer(self)
 
     @property
+    def FormatTool(self) -> "FormatToolViewer":
+        return FormatToolViewer(self)
+
+    @property
+    def GitDiffTool(self) -> "GitDiffToolViewer":
+        return GitDiffToolViewer(self)
+
+    @property
     def GlobTool(self) -> "GlobToolViewer":
         return GlobToolViewer(self)
 
@@ -65,6 +77,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def LSTool(self) -> "LSToolViewer":
         return LSToolViewer(self)
+
+    @property
+    def LintTool(self) -> "LintToolViewer":
+        return LintToolViewer(self)
 
     @property
     def Message(self) -> "MessageViewer":
@@ -81,6 +97,10 @@ class TypeBuilder(type_builder.TypeBuilder):
     @property
     def NotebookReadTool(self) -> "NotebookReadToolViewer":
         return NotebookReadToolViewer(self)
+
+    @property
+    def PytestRunTool(self) -> "PytestRunToolViewer":
+        return PytestRunToolViewer(self)
 
     @property
     def ReadTool(self) -> "ReadToolViewer":
@@ -107,6 +127,10 @@ class TypeBuilder(type_builder.TypeBuilder):
         return TodoWriteToolViewer(self)
 
     @property
+    def TypeCheckTool(self) -> "TypeCheckToolViewer":
+        return TypeCheckToolViewer(self)
+
+    @property
     def WebFetchTool(self) -> "WebFetchToolViewer":
         return WebFetchToolViewer(self)
 
@@ -126,7 +150,7 @@ class TypeBuilder(type_builder.TypeBuilder):
 
 
 # #########################################################################
-# Generated classes 21
+# Generated classes 27
 # #########################################################################
 
 class AgentToolAst:
@@ -223,6 +247,61 @@ class BashToolProperties:
     @property
     def description(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("description"))
+    
+    
+
+
+class DependencyToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("DependencyTool")
+        self._properties: typing.Set[str] = set([  "action",  "check_type",  "requirements_file",  "update_available",  "include_dev",  ])
+        self._props = DependencyToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "DependencyToolProperties":
+        return self._props
+
+
+class DependencyToolViewer(DependencyToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class DependencyToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def check_type(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("check_type"))
+    
+    @property
+    def requirements_file(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("requirements_file"))
+    
+    @property
+    def update_available(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("update_available"))
+    
+    @property
+    def include_dev(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("include_dev"))
     
     
 
@@ -372,6 +451,132 @@ class ExitPlanModeToolProperties:
     
 
 
+class FormatToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("FormatTool")
+        self._properties: typing.Set[str] = set([  "action",  "target_path",  "check_only",  "diff",  "line_length",  "skip_string_normalization",  "target_version",  ])
+        self._props = FormatToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "FormatToolProperties":
+        return self._props
+
+
+class FormatToolViewer(FormatToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class FormatToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def target_path(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("target_path"))
+    
+    @property
+    def check_only(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("check_only"))
+    
+    @property
+    def diff(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("diff"))
+    
+    @property
+    def line_length(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("line_length"))
+    
+    @property
+    def skip_string_normalization(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("skip_string_normalization"))
+    
+    @property
+    def target_version(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("target_version"))
+    
+    
+
+
+class GitDiffToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("GitDiffTool")
+        self._properties: typing.Set[str] = set([  "action",  "target_path",  "reference",  "staged",  "stat",  "context_lines",  "ignore_whitespace",  ])
+        self._props = GitDiffToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "GitDiffToolProperties":
+        return self._props
+
+
+class GitDiffToolViewer(GitDiffToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class GitDiffToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def target_path(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("target_path"))
+    
+    @property
+    def reference(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("reference"))
+    
+    @property
+    def staged(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("staged"))
+    
+    @property
+    def stat(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("stat"))
+    
+    @property
+    def context_lines(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("context_lines"))
+    
+    @property
+    def ignore_whitespace(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("ignore_whitespace"))
+    
+    
+
+
 class GlobToolAst:
     def __init__(self, tb: type_builder.TypeBuilder):
         _tb = tb._tb # type: ignore (we know how to use this private attribute)
@@ -513,6 +718,69 @@ class LSToolProperties:
     @property
     def ignore(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("ignore"))
+    
+    
+
+
+class LintToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("LintTool")
+        self._properties: typing.Set[str] = set([  "action",  "target_path",  "fix",  "show_fixes",  "select_codes",  "ignore",  "format",  ])
+        self._props = LintToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "LintToolProperties":
+        return self._props
+
+
+class LintToolViewer(LintToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class LintToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def target_path(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("target_path"))
+    
+    @property
+    def fix(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("fix"))
+    
+    @property
+    def show_fixes(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("show_fixes"))
+    
+    @property
+    def select_codes(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("select_codes"))
+    
+    @property
+    def ignore(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("ignore"))
+    
+    @property
+    def format(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("format"))
     
     
 
@@ -705,6 +973,73 @@ class NotebookReadToolProperties:
     @property
     def notebook_path(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("notebook_path"))
+    
+    
+
+
+class PytestRunToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("PytestRunTool")
+        self._properties: typing.Set[str] = set([  "action",  "test_path",  "verbose",  "capture",  "markers",  "keywords",  "max_failures",  "timeout",  ])
+        self._props = PytestRunToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "PytestRunToolProperties":
+        return self._props
+
+
+class PytestRunToolViewer(PytestRunToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class PytestRunToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def test_path(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("test_path"))
+    
+    @property
+    def verbose(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("verbose"))
+    
+    @property
+    def capture(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("capture"))
+    
+    @property
+    def markers(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("markers"))
+    
+    @property
+    def keywords(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("keywords"))
+    
+    @property
+    def max_failures(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("max_failures"))
+    
+    @property
+    def timeout(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("timeout"))
     
     
 
@@ -983,6 +1318,69 @@ class TodoWriteToolProperties:
     @property
     def todos(self) -> type_builder.ClassPropertyViewer:
         return type_builder.ClassPropertyViewer(self.__bldr.property("todos"))
+    
+    
+
+
+class TypeCheckToolAst:
+    def __init__(self, tb: type_builder.TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("TypeCheckTool")
+        self._properties: typing.Set[str] = set([  "action",  "target_path",  "checker",  "strict",  "ignore_missing_imports",  "incremental",  "config_file",  ])
+        self._props = TypeCheckToolProperties(self._bldr, self._properties)
+
+    def type(self) -> baml_py.FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "TypeCheckToolProperties":
+        return self._props
+
+
+class TypeCheckToolViewer(TypeCheckToolAst):
+    def __init__(self, tb: type_builder.TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, type_builder.ClassPropertyViewer]]:
+        return [(name, type_builder.ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+    
+
+
+class TypeCheckToolProperties:
+    def __init__(self, bldr: baml_py.ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties # type: ignore (we know how to use this private attribute) # noqa: F821
+
+    
+    
+    @property
+    def action(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("action"))
+    
+    @property
+    def target_path(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("target_path"))
+    
+    @property
+    def checker(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("checker"))
+    
+    @property
+    def strict(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("strict"))
+    
+    @property
+    def ignore_missing_imports(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("ignore_missing_imports"))
+    
+    @property
+    def incremental(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("incremental"))
+    
+    @property
+    def config_file(self) -> type_builder.ClassPropertyViewer:
+        return type_builder.ClassPropertyViewer(self.__bldr.property("config_file"))
     
     
 
