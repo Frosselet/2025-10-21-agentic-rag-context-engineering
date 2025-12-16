@@ -14,7 +14,7 @@ function AgentLoop(state: Message[], working_dir: string) -> AgentTools | ReplyT
   client "openai-responses/gpt-5-mini"
   prompt #"
     {{ _.role("system") }}
-    You are BAMMY, an advanced AI agent capable of handling complex software engineering and general tasks.
+    You are TATty Agent, an advanced AI agent capable of handling complex software engineering and general tasks.
 
     # Environment Context
     Current working directory: {{ working_dir }}
@@ -130,7 +130,7 @@ function SubAgentLoop(goal: string, state: Message[], working_dir: string) -> Su
   client "openai-responses/gpt-5-mini"
   prompt #"
     {{ _.role("system") }}
-    You are a focused sub-agent of BAMMY, assigned to complete a specific task.
+    You are a focused sub-agent of TATty Agent, assigned to complete a specific task.
 
     # Task Assignment
     Your specific goal: {{ goal }}
